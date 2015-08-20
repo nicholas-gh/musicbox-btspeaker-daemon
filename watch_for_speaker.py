@@ -21,6 +21,7 @@ import sys
 
 parser = argparse.ArgumentParser(description='Watch for the speaker box...')
 parser.add_argument('--stay', action='store_true', help='do not detach')
+parser.add_argument('--logfile', help='log to file')
 parser.add_argument('--btaddr', help='Bluetooth address of your speaker - already pared', required=True)
 parser.add_argument('--playlist', help='Mopidy playlist name to start', required=True)
 parser.add_argument('--hue', help='Hue bridge IP')
@@ -157,7 +158,10 @@ def main():
     if args.stay:
         handler = logging.StreamHandler(sys.stdout)
     else:
-        handler = logging.handlers.SysLogHandler(address = '/dev/log')
+        if args.logfile:
+            handler = logging.StreamHandler(open(args.logfile,'a'))
+        else:
+            handler = logging.handlers.SysLogHandler(address = '/dev/log')
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
