@@ -26,6 +26,7 @@ parser.add_argument('--btaddr', help='Bluetooth address of your speaker - alread
 parser.add_argument('--playlist', help='Mopidy playlist name to start', required=True)
 parser.add_argument('--hue', help='Hue bridge IP')
 parser.add_argument('--light', help='Hue light name or number')
+parser.add_argument('--hueconfig', help='Path to hue config file')
 parser.add_argument('--iftttkey', help='IFTTT Maker Key')
 parser.add_argument('--iftttevent_boot', help='IFTTT Maker Event for Boot')
 parser.add_argument('--iftttevent_play', help='IFTTT Maker Event for Playing')
@@ -63,7 +64,7 @@ class Watcher(object):
                  bus,
                  btaddr, 
                  playlist_name,
-                 hue_ip, hue_lamp, 
+                 hue_ip, hue_lamp, hue_config,
                  ifttt_maker_key, ifttt_maker_events,
                  logger):
         self.bus = bus
@@ -73,7 +74,7 @@ class Watcher(object):
         self.ifttt_maker_key = ifttt_maker_key
         self.ifttt_maker_events = ifttt_maker_events
         if hue_ip:
-            self.hue = Bridge(hue_ip)
+            self.hue = Bridge(hue_ip, config_file_path=hue_config)
             self.light = hue_lamp
         else:
             self.hue = None
@@ -172,7 +173,7 @@ def main():
     watcher = Watcher(bus, 
                       args.btaddr,
                       args.playlist,
-                      args.hue, args.light,
+                      args.hue, args.light, args.hueconfig,
                       args.iftttkey, dict(boot = args.iftttevent_boot, 
                                           play = args.iftttevent_play,  
                                           stop = args.iftttevent_stop),
@@ -185,5 +186,5 @@ if args.stay:
     main()
 else:
     with daemon.DaemonContext(pidfile = daemon.pidlockfile.TimeoutPIDLockFile(args.pidfile,
-                                                                            acquire_timeout = 15)):
+                                                                              acquire_timeout = 15)):
         main()
